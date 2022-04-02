@@ -1,9 +1,9 @@
 --[[
 
     Name = Control.lua
-    Version = 1.2.2
-    Date = 1/4/2022
-    Time = 18:16
+    Version = 1.2.3
+    Date = 2/4/2022
+    Time = 20:46
     Author = Jetro
 
 ]]
@@ -13,6 +13,11 @@
 local name = "ReactorControl"
 local filename = name.."/System/Control.lua"
 local version = "1.2.1"
+
+local file = {
+    config = "ReactorControl/System/Config.cfg",
+    log = "ReactorControl/System/log.log"
+}
 
 local reactor = {}
 local turbine = {}
@@ -29,9 +34,9 @@ local last = {
     }
 }
 
-local file = {
-    config = "ReactorControl/System/Config.cfg",
-    log = "ReactorControl/System/log.log"
+local page = {
+    warning = 1,
+    error = 1,
 }
 
 local tW, tH
@@ -130,9 +135,37 @@ function draw_menu_t()
     elseif config.page.term == "settings" then
         
     elseif config.page.term == "warnings" then
-        
+        screen.drawText(1,3,"WARNINGS:",colors.blue,colors.black)
+        screen.drawText(11,3,#config.warning,colors.blue,(#config.warning == 0 and colors.lime) or colors.red)
+        screen.drawRect(2,5,tW-2,tH-5,colors.gray,true,colors.gray)
+        screen.drawText(2,5,"Page: ("..page.warning.."/"..math.ceil(((#config.warning == 0 and 1) or #config.warning)/12)..")",colors.gray,colors.black)
+        screen.drawText(tW-17,5,"[ PREV ] [ NEXT ]")
+        if #config.warning == 0 then
+            screen.drawText(2,6,"No warnings")
+        else
+            for i = 1, #config.warning do
+                if i > (page.warning-1)*12 and i <= (page.warning-1)*12+12 then
+                    screen.drawText(2,5+(i-(page.warning-1)*12),config.warning[i])
+                    screen.drawText(tW-3,5+(i-(page.warning-1)*12),"[X]")
+                end
+            end
+        end
     elseif config.page.term == "errors" then
-        
+        screen.drawText(1,3,"ERRORS:",colors.blue,colors.black)
+        screen.drawText(11,3,#config.error,colors.blue,(#config.error == 0 and colors.lime) or colors.red)
+        screen.drawRect(2,5,tW-2,tH-5,colors.gray,true,colors.gray)
+        screen.drawText(2,5,"Page: ("..page.error.."/"..math.ceil(((#config.error == 0 and 1) or #config.error)/12)..")",colors.gray,colors.black)
+        screen.drawText(tW-17,5,"[ PREV ] [ NEXT ]")
+        if #config.error == 0 then
+            screen.drawText(2,6,"No errors")
+        else
+            for i = 1, #config.error do
+                if i > (page.error-1)*12 and i <= (page.error-1)*12+12 then
+                    screen.drawText(2,5+(i-(page.error-1)*12),config.error[i])
+                    screen.drawText(tW-3,5+(i-(page.error-1)*12),"[X]")
+                end
+            end
+        end
     elseif config.page.term == "commands" then
 
     elseif config.page.term == "update" then
@@ -274,6 +307,43 @@ function control_touch()
             config_write()
         end
         last.page.term = config.page.term
+    elseif event == "mouse_click" then
+        side = a
+        x = b
+        y = c
+        if config.page.term == "warnings" then
+            if x >= 34 and x <= 41 and y == 5 then
+                if page.warning > 1 then
+                    page.warning = page.warning - 1
+                end
+            elseif x >= 43 and x <= 50 and y == 5 then
+                if page.warning < math.ceil(((#config.warning == 0 and 1) or #config.warning)/12) then
+                    page.warning = page.warning + 1
+                end
+            end
+            for i = 1, #config.warning do
+                if x >= 48 and x <= 50 and y == 5+(i-(page.warning-1)*12) then
+                    table.remove(config.warning,i)
+                    config_write()
+                end
+            end
+        elseif config.page.term == "errors" then
+            if x >= 34 and x <= 41 and y == 5 then
+                if page.error > 1 then
+                    page.error = page.error - 1
+                end
+            elseif x >= 43 and x <= 50 and y == 5 then
+                if page.error < math.ceil(((#config.error == 0 and 1) or #config.error)/12) then
+                    page.error = page.error + 1
+                end
+            end
+            for i = 1, #config.error do
+                if x >= 48 and x <= 50 and y == 5+(i-(page.error-1)*12) then
+                    table.remove(config.error,i)
+                    config_write()
+                end
+            end
+        end
     end
 end
 
