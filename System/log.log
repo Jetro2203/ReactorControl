@@ -1,0 +1,9 @@
+[INFO] [ReactorControl/System/Display.lua] loading APIs --
+[DEBUG] [ReactorControl/System/Display.lua] API succesfully loaded: screen.api
+[INFO] [ReactorControl/System/Display.lua] completed
+[INFO] [ReactorControl/System/Display.lua] looking for peripherals...
+[DEBUG] [ReactorControl/System/Display.lua] Found 1 Reactor
+[DEBUG] [ReactorControl/System/Display.lua] Found 4 Turbines
+[DEBUG] [ReactorControl/System/Display.lua] Found 1 Battery
+[DEBUG] [ReactorControl/System/Display.lua] Found 1 Monitor
+[INFO] [ReactorControl/System/Display.lua] completed
