@@ -1,49 +1,59 @@
+--[[
+
+    Name = Installer.lua
+    Version = 2.0
+    Date = 2/4/2022
+    Time = 18:41
+    Author = Jetro
+
+]]
+
+-- Variables
+
 local name = "ReactorControl"
-local version = "1.0.2"
- 
+local version = "2.0"
+
 local logFile = "OS/logs/Installer.log"
- 
+
 local files = {
-    ["startup.lua"] = "0SBmYkMN",
-    [name.."/System/Control.lua"] = "zUEdBysu",
-    [name.."/System/Display.lua"] = "QFkTRvd1",
-    [name.."/System/Redstone.lua"] = "8zfDPc3B",
-    [name.."/System/Config.cfg"] = "qXFULTjg",
-    [name.."/Symbols/Stop.nfp"] = "QJafZx6b",
-    [name.."/Symbols/Start.nfp"] = "fmFckamj",
-    [name.."/Symbols/Radioactive.nfp"] = "DXh3Pzzf",
-    ["OS/APIs/screen.api"] = "uSzxUdLg",
+    ["startup.lua"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/startup.lua",
+    [name.."/System/Control.lua"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/System/Control.lua",
+    [name.."/System/Display.lua"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/System/Display.lua",
+    [name.."/System/Redstone.lua"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/System/Redstone.lua",
+    [name.."/System/Config.cfg"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/System/Config.cfg",
+    [name.."/Symbols/Stop.nfp"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/Symbols/Stop.nfp",
+    [name.."/Symbols/Start.nfp"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/Symbols/Start.nfp",
+    [name.."/Symbols/RadioActive.nfp"] = "https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/Symbols/Radioactive.nfp",
+    ["OS/APIs/screen.api"] = "https://raw.githubusercontent.com/Jetro2203/APIs/main/screen.api",
 }
- 
+
 -- Functions
- 
+
 function log(data)
     myLog = fs.open(logFile,"a")
     print(data)
     myLog.write(data.."\n")
     myLog.close()
 end
- 
+
 function old_delete()
     log("Deleting old files...\n")
-    for location, pastebin_code in pairs(files) do
-        if fs.exists(location) then
-            log("deleting old file: "..location)
-            fs.delete(location)
-        end
+    for location, github in pairs(files) do
+        log("deleting old file: "..location)
+        fs.delete(location)
     end
     log("\nComplete")
 end
 
 function new_download()
     log("Downloading new files...\n")
-    for location, pastebin_code in pairs(files) do
+    for location, github in pairs(files) do
         log("downloading new file: "..location)
-        shell.run("pastebin","get",pastebin_code,location)
+        shell.run("wget",github,location)
     end
-    log("\nComplete")      
+    log("\nComplete")   
 end
- 
+
 -- Main
  
 shell.run("clear")
@@ -67,7 +77,7 @@ if input == "1" then
     fs.delete(name.."/Installer.lua")
     log("\nComplete")
     log("\nDownloading new installer")
-    shell.run("pastebin","get","M59hM8gQ",name.."/Installer.lua")
+    shell.run("wget","https://github.com/Jetro2203/ReactorControl/blob/main/Installer.lua",name.."/Installer.lua")
     log("\nComplete")
     log("started new installer...")
     sleep(1)
@@ -78,7 +88,7 @@ elseif input == "2" then
         log("do you want to update? [Y/N]")
         input = string.upper(read())
         x,y = term.getCursorPos()
-term.setCursorPos(x,y-1)
+        term.setCursorPos(x,y-1)
         log(input)
         if input == "Y" then
             old_delete()
@@ -98,7 +108,7 @@ term.setCursorPos(x,y-1)
         log("do you want to install "..name.."? [Y/N]")
         input = string.upper(read())
         x,y = term.getCursorPos()
-term.setCursorPos(x,y-1)
+        term.setCursorPos(x,y-1)
         log(input)
         if input == "Y" then
             old_delete()
