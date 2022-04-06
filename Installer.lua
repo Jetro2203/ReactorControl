@@ -2,8 +2,8 @@
 
     Name = Installer.lua
     Version = 2.0
-    Date = 2/4/2022
-    Time = 18:41
+    Date = 6/4/2022
+    Time = 15:15
     Author = Jetro
 
 ]]
@@ -36,22 +36,60 @@ function log(data)
     myLog.close()
 end
 
-function old_delete()
-    log("Deleting old files...\n")
-    for location, github in pairs(files) do
-        log("deleting old file: "..location)
-        fs.delete(location)
+function delete_file(location)
+    log("Deleting files: "..location)
+    fs.delete(location)
+end
+
+function delete_all(table_files)
+    log("\nDeleting all files...")
+    for location, URL in pairs(table_files) do
+        delete_file(location)
     end
     log("\nComplete")
 end
 
-function new_download()
-    log("Downloading new files...\n")
-    for location, github in pairs(files) do
-        log("downloading new file: "..location)
-        shell.run("wget",github,location)
+function write_file(location, data)
+    if fs.exists(location) then
+        log("Unable to create new file: file already exists: "..location)
+        error("Unable to create new file: file already exists: "..location)
+    else
+        myFile = fs.open(location, "w")
+        myFile.write(data)
+        myFile.close()
     end
-    log("\nComplete")   
+end
+
+function download_file(URL,location)
+    log("Downloading "..URL.." as "..location)
+    if http.checkURL(URL) then
+        myGithub = http.get(URL)
+        data = myGithub.readAll()
+        myGithub.close()
+        write_file(location,data)
+    else
+        error("Unable to find URL:"..URL)
+    end
+end
+
+function download_all(table_files)
+    log("\nDownloading all files...")
+    for location, URL in pairs(table_files) do
+        download_file(URL,location)
+    end
+    log("\nComplete")
+end
+
+function update()
+    delete_all(files)
+    download_all(files)
+    log("\nLogFile: "..logFile)
+    log("Rebooting...")
+    myStartup = fs.open("OS/files/StartupMode.txt","w")
+    myStartup.write(name.."_normal")
+    myStartup.close()
+    sleep(2)
+    os.reboot()
 end
 
 -- Main
@@ -91,12 +129,7 @@ elseif input == "2" then
         term.setCursorPos(x,y-1)
         log(input)
         if input == "Y" then
-            old_delete()
-            new_download()
-            log("\nLogFile: "..logFile)
-            log("Rebooting...")
-            sleep(2)
-            os.reboot()
+            update()
         elseif input == "N" then
             log("")
             log("Cancelling update")
@@ -111,12 +144,7 @@ elseif input == "2" then
         term.setCursorPos(x,y-1)
         log(input)
         if input == "Y" then
-            old_delete()
-            new_download()
-            log("\nLogFile: "..logFile)
-            log("Rebooting...")
-            sleep(2)
-            os.reboot()
+            update()
         elseif input == "N" then
             log("")
             log("Cancelling update")
