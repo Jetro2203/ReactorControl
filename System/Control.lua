@@ -1,9 +1,9 @@
 --[[
 
     Name = Control.lua
-    Version = 1.2.3
-    Date = 2/4/2022
-    Time = 20:46
+    Version = 1.2.4
+    Date = 6/4/2022
+    Time = 14:56
     Author = Jetro
 
 ]]
@@ -12,7 +12,7 @@
 
 local name = "ReactorControl"
 local filename = name.."/System/Control.lua"
-local version = "1.2.1"
+local version = "1.2.4"
 
 local file = {
     config = "ReactorControl/System/Config.cfg",
@@ -173,13 +173,15 @@ function draw_menu_t()
         screen.drawText(1,4,"Are you sure [Y/N]\n")
         event, key = os.pullEvent("key")
         if key == keys.y then
-            shell.run("pastebin","run","M59hM8gQ")
+            sleep(.1)
+            shell.run(name.."/Installer.lua")
         elseif key == keys.n then
             screen.drawText(1,6,"update cancelled")
             sleep(1)
-            config.page.term = "home"
-            config_write()
+            
         end
+        config.page.term = "home"
+        config_write()
     end
 end
 
