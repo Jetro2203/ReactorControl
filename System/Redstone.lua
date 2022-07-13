@@ -1,9 +1,9 @@
 --[[
 
     Name = Redstone.lua
-    Version = 1.0.2
-    Date = 1/4/2022
-    Time = 17:36
+    Version = 1.0.3
+    Date = 13/7/2022
+    Time = 13:09
     Author = Jetro
 
 ]]
@@ -46,12 +46,12 @@ end
 
 function log(logType, data)
     myLog = fs.open(file.log,"a")
-    myLog.write("["..string.upper(logType).."] ["..filename.."] "..data.."\n")
+    myLog.write("["..string.upper(logType).."] "..data.."\n")
     myLog.close()
     if string.lower(logType) == "error" then
-        table.insert(config.error,"["..logType.."] ["..filename.."] "..data)
+        table.insert(config.error,"["..logType.."] "..data)
     elseif string.lower(logType) == "warning" then
-        table.insert(config.warning,"["..logType.."] ["..filename.."] "..data)
+        table.insert(config.warning,"["..logType.."] "..data)
     end
     config_write()
 end
