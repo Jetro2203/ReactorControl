@@ -115,7 +115,7 @@ if input == "1" then
     fs.delete(name.."/Installer.lua")
     log("\nComplete")
     log("\nDownloading new installer")
-    shell.run("wget","https://github.com/Jetro2203/ReactorControl/blob/main/Installer.lua",name.."/Installer.lua")
+    shell.run("wget","https://raw.githubusercontent.com/Jetro2203/ReactorControl/main/Installer.lua",name.."/Installer.lua")
     log("\nComplete")
     log("started new installer...")
     sleep(1)
