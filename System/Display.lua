@@ -1,9 +1,9 @@
 --[[
 
     Name = Diplay.lua
-    Version = 1.2.2
-    Date = 1/4/2022
-    Time = 17:54
+    Version = 1.2.3
+    Date = 13/7/2022
+    Time = 13:09
     Author = Jetro
 
 ]]
@@ -36,10 +36,10 @@ local file = {
 }
 
 local peripheral_limit = {
-    ["reactor"] = 1,
-    ["turbine"] = 4,
-    ["battery"] = 1,
-    ["monitor"] = 1,
+    reactor = 1,
+    turbine = 4,
+    battery = 1,
+    monitor = 1,
 }
 
 local mW, mH
@@ -71,12 +71,12 @@ end
 
 function log(logType, data)
     myLog = fs.open(file.log,"a")
-    myLog.write("["..string.upper(logType).."] ["..filename.."] "..data.."\n")
+    myLog.write("["..string.upper(logType).."] "..data.."\n")
     myLog.close()
     if string.lower(logType) == "error" then
-        table.insert(config.error,"["..logType.."] ["..filename.."] "..data)
+        table.insert(config.error,"["..logType.."] "..data)
     elseif string.lower(logType) == "warning" then
-        table.insert(config.warning,"["..logType.."] ["..filename.."] "..data)
+        table.insert(config.warning,"["..logType.."] "..data)
     end
     config_write()
 end
@@ -220,13 +220,13 @@ function draw_menu_m()
         screen.drawTextM(2,3,"AUTOMODE: ",colors.blue)
         draw_button(12,3,config.button.automode)
         screen.drawTextM(2,5,"REACTOR: ",colors.blue,colors.black)
-        screen.drawTextM(11,5,((reactor[1].getActive() == false and "offline") or (reactor[1].getActive() == true and "online")),colors.blue,((reactor[1].getActive() == false and colors.red) or (reactor[1].getActive() == true and colors.lime)))
+        screen.drawTextM(11,5,((not(reactor[1].getActive()) and "offline") or (reactor[1].getActive() and "online")),colors.blue,((not(reactor[1].getActive()) and colors.red) or (reactor[1].getActive() and colors.lime)))
         for i = 1,#turbine do
             screen.drawTextM(2,6+i,tostring(i),(config.turbine.lockout[i] and colors.blue) or colors.red,colors.black)
             screen.drawTextM(5,6+i,": TURBINE:",colors.blue,colors.black)
-            screen.drawTextM(16,6+i,((turbine[i].getActive() == false and "offline") or (turbine[i].getActive() == true and "online")),colors.blue,((turbine[i].getActive() == false and colors.red) or (turbine[i].getActive() == true and colors.lime)))
+            screen.drawTextM(16,6+i,((not(turbine[i].getActive()) and "offline") or (turbine[i].getActive() and "online")),colors.blue,((not(turbine[i].getActive()) and colors.red) or (turbine[i].getActive() and colors.lime)))
             screen.drawTextM(27,6+i,"COILS: ",colors.blue,colors.black)
-            screen.drawTextM(34,6+i,((turbine[i].getInductorEngaged() == false and "disengaged") or (turbine[i].getInductorEngaged() == true and "engaged")),colors.blue,((turbine[i].getInductorEngaged() == false and colors.red) or (turbine[i].getInductorEngaged() == true and colors.lime)))
+            screen.drawTextM(34,6+i,(((turbine[i].getInductorEngaged()) and "disengaged") or (turbine[i].getInductorEngaged() and "engaged")),colors.blue,((not(turbine[i].getInductorEngaged()) and colors.red) or (turbine[i].getInductorEngaged() and colors.lime)))
             screen.drawTextM(48,6+i,"SPEED: "..(math.floor(turbine[i].getRotorSpeed()*100)/100).." RPM",colors.blue,colors.black)
             screen.drawTextM(70,6+i,(not(config.turbine.lockout[i]) and "LOCKOUT") or "",colors.red,colors.black)
         end
@@ -237,7 +237,7 @@ function draw_menu_m()
         screen.drawTextM(mW-11,mH-2,string.rep(" ",10),colors.blue,colors.black)
         screen.drawTextM(mW-11,mH-2,((battery[1].getAverageChangePerTick() > 0 and "Charging") or (battery[1].getAverageChangePerTick() < 0 and "Discharging") or (battery[1].getAverageChangePerTick() == 0 and "Stable")),colors.blue,colors.black)
     elseif config.page.mon == "reactor" then
-        draw_image("radioactive",mW-3-22,4)
+        --draw_image("radioactive",mW-3-22,4)
     elseif config.page == "turbine" then
 
     elseif config.page.mon == "battery" then
@@ -294,8 +294,27 @@ function control()
                             reactor[i].setActive(true)
                         end
                     end
+                    if reactor[i].getCoolantAmount() < 21800*0.5 then
+                        if not(rs.getOutput(config.reactor.coolant_side)) then
+                            log("warning","reactor "..i..": coolant level low")
+                            rs.setOutput(config.reactor.coolant_side,true)                            
+                        end
+                    elseif reactor[i].getCoolantAmount() > 21800*0.5 then
+                        if rs.getOutput(config.reactor.coolant_side) then
+                            rs.setOutput(config.reactor.coolant_side,false)
+                        end
+                    end
                 else
-
+                    if reactor[i].getCoolantAmount() < 21800*0.5 then
+                        if not(rs.getOutput(config.reactor.coolant_side)) then
+                            log("warning","reactor "..i..": coolant level low")
+                            rs.setOutput(config.reactor.coolant_side,true)                            
+                        end
+                    elseif reactor[i].getCoolantAmount() > 21800*0.5 then
+                        if rs.getOutput(config.reactor.coolant_side) then
+                            rs.setOutput(config.reactor.coolant_side,false)
+                        end
+                    end
                 end
             end
         end
@@ -332,7 +351,7 @@ function control()
                 else
                     if turbine[i].getRotorSpeed() > config.setting.inductor_emergency_high then
                         if not(turbine[i].getInductorEngaged()) then
-                            turbine[i].setInductorEngaged(true)
+                            --turbine[i].setInductorEngaged(true)
                             log("warning","turbine "..i..": inductor engaged - exceeded emergency speed")
                         end
                     end
@@ -376,6 +395,7 @@ function start()
     init_apis()
     init_peripheral()
     init_monitor()
+    sleep(1)
     main()
 end
 
